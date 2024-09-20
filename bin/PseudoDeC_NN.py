@@ -52,10 +52,10 @@ def PseudoDec_NN_Model(Inp_1, Inp_2, labels, kmer_model):
     x1 = Inception_res_block(x1,256)
     x1 = MaxPooling1D(2)(x1)
 
-    x1 = Inception_res_block(x1,384)
+    x1 = Inception_res_block(x1,512)
 
     x1 = tf.transpose(x1, perm=[1, 2, 0])
-    x1 = Resizing(Inp_2, 384)(x1)
+    x1 = Resizing(Inp_2, 512)(x1)
     x1 = tf.transpose(x1, perm=[2, 0, 1])
 
     input_layer2 = Input((Inp_2,4), name='Input_2')
