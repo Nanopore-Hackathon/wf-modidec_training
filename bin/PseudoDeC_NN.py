@@ -39,7 +39,7 @@ def Inception_res_block(x, N_filters):
     return out
 
 
-def PseudoDec_NN_Model(Inp_1, Inp_2, labels):
+def PseudoDec_NN_Model(Inp_1, Inp_2, labels, kmer_model):
 
     input_layer1 = Input((Inp_1,1), name='Input_1')
 
@@ -61,7 +61,8 @@ def PseudoDec_NN_Model(Inp_1, Inp_2, labels):
     input_layer2 = Input((Inp_2,4), name='Input_2')
     masked_input = Masking(mask_value=0.0)(input_layer2)
 
-    x2 = Inception_res_block(masked_input, 64)
+    x2 = Conv1D_swish_bn(masked_input, 64, kmer_model, 1)
+    x2 = Inception_res_block(x2, 64)
     x2 = Inception_res_block(x2, 128)
     x2 = Inception_res_block(x2, 256)
 
