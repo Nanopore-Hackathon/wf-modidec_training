@@ -2,8 +2,8 @@ import sys
 from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QFileDialog, QVBoxLayout, QWidget, QLineEdit, QLabel, QHBoxLayout, QCheckBox
 import tensorflow as tf
 from keras.callbacks import LearningRateScheduler
-from bin.Load_data_for_training_V2 import  Load_data_RNA #Data loader for efficient memory handling
-from bin.PseudoDeC_NN import PseudoDec_NN_Model #Essential function to be imported 
+from Load_data_for_training_V2 import  Load_data_RNA #Data loader for efficient memory handling
+from PseudoDeC_NN import PseudoDec_NN_Model #Essential function to be imported 
 import os
 
 class MainWindow(QMainWindow):
