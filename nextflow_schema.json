@@ -1,0 +1,164 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "https://raw.githubusercontent.com/./master/nextflow_schema.json",
+    "title": "wf-modidec",
+    "workflow_title": "wf-modidec_training",
+    "description": "Nextflow workflow for training Modidec.",
+    "demo_url": "",
+    "aws_demo_url": "",
+    "url": "https://github.com/nanopore-hackathon/wf-modidec_training",
+    "type": "object",
+    "definitions": {
+        "input": {
+            "title": "Input Options",
+            "type": "object",
+            "fa_icon": "fas fa-arrow-right",
+            "description": "Specify the location of the data to use for training, as well as the folder in which to save the trained model.",
+            "properties": {
+                "train_path": {
+                    "type": "string",
+                    "format": "path",
+                    "title": "Training data folder",
+                    "description": "Folder containing data for training the model"
+                },
+                "valid_path": {
+                    "type": "string",
+                    "format": "file-path",
+                    "title": "Validation data folder",
+                    "description": "Folder containing validation data for the model training",
+                    "help_text": "Please use a bam file that has been basecalled with dorado using the --emit-moves option and was mapped by mimimap using the --MD flags."
+                },
+                "model_path": {
+                    "type": "string",
+                    "format": "path",
+                    "title": "Output folder",
+                    "description": "Folder path in which to save the model"
+                }
+            },
+            "required": [
+                "train_path",
+                "valid_path",
+                "model_path"
+            ]
+        },
+        "training_options": {
+            "title": "Training Options",
+            "type": "object",
+            "fa_icon": "far fa-question-circle",
+            "description": "Options for training the model.",
+            "help_text": "Make sure that chunk size corresponds to what was used in the data curation step...",
+            "properties": {
+                "chunk_size": {
+                    "type": "integer",
+                    "description": "Specify the chunk size that was used in data curation",
+                    "default": 400
+                },
+                "batch_size": {
+                    "type": "integer",
+                    "description": "Minibatch size for naural network training",
+                    "default": 30
+                },
+                "single_data_size": {
+                    "type": "integer",
+                    "description": "TODO",
+                    "default": 30
+                },
+                "max_seq_length": {
+                    "type": "integer",
+                    "description": "TODO",
+                    "default": 30
+                },
+                "kmer model": {
+                    "type": "integer",
+                    "description": "TODO",
+                    "default": 30
+                },
+                "labels": {
+                    "type": "integer",
+                    "description": "TODO",
+                    "default": 30
+                },
+                "epochs": {
+                    "type": "integer",
+                    "description": "TODO",
+                    "default": 4
+                },
+                "model_name": {
+                    "type": "string",
+                    "description": "TODO",
+                    "default": "modidec"
+                }
+            }
+        },
+        "misc": {
+            "title": "Miscellaneous Options",
+            "type": "object",
+            "description": "Everything else.",
+            "default": "",
+            "properties": {
+                "disable_ping": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Enable to prevent sending a workflow ping."
+                },
+                "help": {
+                    "type": "boolean",
+                    "description": "Display help text.",
+                    "fa_icon": "fas fa-question-circle",
+                    "default": false,
+                    "hidden": true
+                },
+                "version": {
+                    "type": "boolean",
+                    "description": "Display version and exit.",
+                    "fa_icon": "fas fa-question-circle",
+                    "default": false,
+                    "hidden": true
+                }
+            }
+        }
+    },
+    "allOf": [
+        {
+            "$ref": "#/definitions/input"
+        },
+        {
+            "$ref": "#/definitions/training_options"
+        },
+        {
+            "$ref": "#/definitions/misc"
+        }
+    ],
+    "properties": {
+        "aws_image_prefix": {
+            "type": "string",
+            "hidden": true
+        },
+        "aws_queue": {
+            "type": "string",
+            "hidden": true
+        },
+        "monochrome_logs": {
+            "type": "boolean"
+        },
+        "validate_params": {
+            "type": "boolean",
+            "default": true
+        },
+        "show_hidden_params": {
+            "type": "boolean"
+        }
+    },
+    "resources": {
+        "recommended": {
+            "cpus": 16,
+            "memory": "64GB"
+        },
+        "minimum": {
+            "cpus": 16,
+            "memory": "64GB"
+        },
+        "run_time": "5 minutes per sample",
+        "arm_support": true
+    }
+}
