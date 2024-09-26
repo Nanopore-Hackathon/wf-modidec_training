@@ -19,14 +19,15 @@
                     "type": "string",
                     "format": "path",
                     "title": "Training data folder",
-                    "description": "Folder containing data for training the model"
+                    "description": "Folder containing data for training the model",
+                    "help_text": "Data can be generated using the XXX workflow (link)."
                 },
                 "valid_path": {
                     "type": "string",
                     "format": "file-path",
                     "title": "Validation data folder",
                     "description": "Folder containing validation data for the model training",
-                    "help_text": "Please use a bam file that has been basecalled with dorado using the --emit-moves option and was mapped by mimimap using the --MD flags."
+                    "help_text": "Data can be generated using the XXX workflow (link)."
                 },
                 "model_path": {
                     "type": "string",
@@ -60,7 +61,7 @@
                 },
                 "single_data_size": {
                     "type": "integer",
-                    "description": "TODO",
+                    "description": "Number of reads present in a single training file (as configured in the data curation workflow)",
                     "default": 30
                 },
                 "max_seq_length": {
@@ -70,7 +71,7 @@
                 },
                 "kmer_model": {
                     "type": "integer",
-                    "description": "TODO",
+                    "description": "Specify the kmer model to be used: either 5- or 9- mers.",
                     "default": 30
                 },
                 "labels": {
@@ -80,12 +81,13 @@
                 },
                 "epochs": {
                     "type": "integer",
-                    "description": "TODO",
-                    "default": 4
+                    "description": "Number of epochs to be used when training the model",
+                    "default": 4,
+                    "help_text": "This refers to the number of 'passes' to do over the training set. Note: higher values will result in longer training time."
                 },
                 "model_name": {
                     "type": "string",
-                    "description": "TODO",
+                    "description": "If you wish, you can specify a name for the model.",
                     "default": "modidec"
                 }
             }
