@@ -4,7 +4,6 @@ import groovy.json.JsonBuilder
 import nextflow.util.BlankSeparatedList
 import java.time.LocalDateTime
 nextflow.enable.dsl = 2
-nextflow.preview.recursion=true 
 
 process TrainNeuralNetwork{
     label "modidec"
