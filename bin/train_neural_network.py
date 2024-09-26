@@ -131,6 +131,7 @@ model_name = str(options.model_name)
 def NN_train(
     train_path: str,
     valid_path: str,
+    model_path: str,
     seq_len: int,
     batch_size: int,
     single_data_size: int,
@@ -138,6 +139,7 @@ def NN_train(
     k_mer: int,
     labels: int,
     N_epoch: int,
+    model_name: str,
 ):
 
     data_list = os.listdir(train_path)  # List of train data
@@ -244,18 +246,21 @@ def train_nn(
 ):
     # Call training and then plot some other stuff
     fit_results = NN_train(
-    train_path=train_path,
-    valid_path=valid_path,
-    seq_len=chunk_size,
-    batch_size=batch_size,
-    single_data_size=single_data_size,
-    max_seq_len=max_seq_length,
-    k_mer=kmer_model,
-    labels=labels,
-    N_epoch=epochs
+        train_path=train_path,
+        valid_path=valid_path,
+        model_path=model_path,
+        seq_len=chunk_size,
+        batch_size=batch_size,
+        single_data_size=single_data_size,
+        max_seq_len=max_seq_length,
+        k_mer=kmer_model,
+        labels=labels,
+        N_epoch=epochs,
+        model_name=model_name,
     )
     return fit_results
     # in principle fit_results is a dict containing the following keys: 'loss', 'acc', 'val_loss', 'val_acc', 'lr'
+
 
 #     layout = go.Layout(height=800)
 #     fig = go.Figure(layout=layout)
@@ -275,7 +280,8 @@ def train_nn(
 #     pass
 
 # train_nn()
-train_nn(train_path=train_path,
+train_nn(
+    train_path=train_path,
     valid_path=valid_path,
     model_path=model_path,
     chunk_size=chunk_size,
@@ -285,5 +291,5 @@ train_nn(train_path=train_path,
     kmer_model=kmer_model,
     labels=labels,
     epochs=epochs,
-    model_name=model_name
-    )
+    model_name=model_name,
+)
