@@ -212,19 +212,20 @@ def NN_train(
     )
 
     # starts the model training
-    model.fit(
+    fit_results = model.fit(
         training_generator,
         shuffle=True,
         epochs=N_epoch,
         workers=6,
         max_queue_size=256,
         callbacks=[lr_scheduler],
-    )  # callbacks= [lr_scheduler]
+    )
 
     # saves the model
     model.save(model_path + "/" + model_name)  # ?
 
     print("training complete")
+    return fit_results
 
 
 # Outer function
@@ -242,5 +243,23 @@ def train_nn(
     model_name: str,
 ):
     # Call training and then plot some other stuff
-    NN_train()
+    fit_results = NN_train()
+
+    # in principle fit_results is a dict containing the following keys: 'loss', 'acc', 'val_loss', 'val_acc', 'lr'
+
+    layout = go.Layout(height=800)
+    fig = go.Figure(layout=layout)
+
+    # TODO: Check if plot happens
+    fig.add_trace(
+        go.Scatter(
+            x=range(0, fit_results["loss"]),
+            y=fit_results["loss"],
+            mode="lines+markers",
+            line=dict(color="rgba(72,99,156,1)"),
+            showlegend=True,
+            name="Accuracy",
+        )
+    )
+
     pass
