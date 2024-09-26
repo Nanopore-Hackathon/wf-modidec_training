@@ -243,23 +243,47 @@ def train_nn(
     model_name: str,
 ):
     # Call training and then plot some other stuff
-    fit_results = NN_train()
-
+    fit_results = NN_train(
+    train_path=train_path,
+    valid_path=valid_path,
+    seq_len=chunk_size,
+    batch_size=batch_size,
+    single_data_size=single_data_size,
+    max_seq_len=max_seq_length,
+    k_mer=kmer_model,
+    labels=labels,
+    N_epoch=epochs
+    )
+    return fit_results
     # in principle fit_results is a dict containing the following keys: 'loss', 'acc', 'val_loss', 'val_acc', 'lr'
 
-    layout = go.Layout(height=800)
-    fig = go.Figure(layout=layout)
+#     layout = go.Layout(height=800)
+#     fig = go.Figure(layout=layout)
 
-    # TODO: Check if plot happens
-    fig.add_trace(
-        go.Scatter(
-            x=range(0, fit_results["loss"]),
-            y=fit_results["loss"],
-            mode="lines+markers",
-            line=dict(color="rgba(72,99,156,1)"),
-            showlegend=True,
-            name="Accuracy",
-        )
+#     # Check if plot happens
+#     fig.add_trace(
+#         go.Scatter(
+#             x=range(0, fit_results["loss"]),
+#             y=fit_results["loss"],
+#             mode="lines+markers",
+#             line=dict(color="rgba(72,99,156,1)"),
+#             showlegend=True,
+#             name="Accuracy",
+#         )
+#     )
+
+#     pass
+
+# train_nn()
+train_nn(train_path=train_path,
+    valid_path=valid_path,
+    model_path=model_path,
+    chunk_size=chunk_size,
+    batch_size=batch_size,
+    single_data_size=single_data_size,
+    max_seq_length=max_seq_length,
+    kmer_model=kmer_model,
+    labels=labels,
+    epochs=epochs,
+    model_name=model_name
     )
-
-    pass
