@@ -142,6 +142,17 @@ def NN_train(
     model_name: str,
 ):
 
+    gpus = tf.config.list_physical_devices("GPU")
+    if gpus:
+        try:
+            for gpu in gpus:
+                tf.config.experimental.set_memory_growth(gpu, True)
+            print(f"Memory growth: {tf.config.experimental.get_memory_growth(gpus[0])}")
+        except RuntimeError as e:
+            print(e)
+    else:
+        print("No GPU detected")
+
     data_list = os.listdir(train_path)  # List of train data
     eval_list = os.listdir(valid_path)  # List of valid data
 
