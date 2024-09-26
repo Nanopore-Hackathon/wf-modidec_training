@@ -68,7 +68,7 @@
                     "description": "TODO",
                     "default": 30
                 },
-                "kmer model": {
+                "kmer_model": {
                     "type": "integer",
                     "description": "TODO",
                     "default": 30
