@@ -270,72 +270,72 @@ def train_nn(
         model_name=model_name,
     )
 
-    print("Plotting...")
-    # Plot accuracy
-    layout = go.Layout(height=800)
-    fig = go.Figure(layout=layout)
+    # print("Plotting...")
+    # # Plot accuracy
+    # layout = go.Layout(height=800)
+    # fig = go.Figure(layout=layout)
 
-    fig.add_trace(
-        go.Scatter(
-            y=fit_results["acc"],
-            mode="lines+markers",
-            line=dict(color="rgba(72,99,156,1)"),
-            showlegend=True,
-            name="Training",
-        )
-    )
+    # fig.add_trace(
+    #     go.Scatter(
+    #         y=fit_results["acc"],
+    #         mode="lines+markers",
+    #         line=dict(color="rgba(72,99,156,1)"),
+    #         showlegend=True,
+    #         name="Training",
+    #     )
+    # )
 
-    fig.add_trace(
-        go.Scatter(
-            y=fit_results["val_acc"],
-            mode="lines+markers",
-            line=dict(color="rgba(19,24,156,1)"),
-            showlegend=True,
-            name="Validation",
-        )
-    )
+    # fig.add_trace(
+    #     go.Scatter(
+    #         y=fit_results["val_acc"],
+    #         mode="lines+markers",
+    #         line=dict(color="rgba(19,24,156,1)"),
+    #         showlegend=True,
+    #         name="Validation",
+    #     )
+    # )
 
-    fig.update_layout(
-        xaxis=dict(title="Iteration", gridcolor="white"),
-        yaxis=dict(
-            title="Accuracy", gridcolor="white", zeroline=True, zerolinecolor="black"
-        ),
-        plot_bgcolor="rgba(0,0,0,0)",
-    )
-    plotly.io.write_html(fig, "./report_accuracy.html")
+    # fig.update_layout(
+    #     xaxis=dict(title="Iteration", gridcolor="white"),
+    #     yaxis=dict(
+    #         title="Accuracy", gridcolor="white", zeroline=True, zerolinecolor="black"
+    #     ),
+    #     plot_bgcolor="rgba(0,0,0,0)",
+    # )
+    # plotly.io.write_html(fig, "./report_accuracy.html")
 
-    # Plot loss
-    layout = go.Layout(height=800)
-    fig = go.Figure(layout=layout)
+    # # Plot loss
+    # layout = go.Layout(height=800)
+    # fig = go.Figure(layout=layout)
 
-    fig.add_trace(
-        go.Scatter(
-            y=fit_results["loss"],
-            mode="lines+markers",
-            line=dict(color="rgba(72,99,156,1)"),
-            showlegend=True,
-            name="Training",
-        )
-    )
+    # fig.add_trace(
+    #     go.Scatter(
+    #         y=fit_results["loss"],
+    #         mode="lines+markers",
+    #         line=dict(color="rgba(72,99,156,1)"),
+    #         showlegend=True,
+    #         name="Training",
+    #     )
+    # )
 
-    fig.add_trace(
-        go.Scatter(
-            y=fit_results["val_loss"],
-            mode="lines+markers",
-            line=dict(color="rgba(19,24,156,1)"),
-            showlegend=True,
-            name="Validation",
-        )
-    )
+    # fig.add_trace(
+    #     go.Scatter(
+    #         y=fit_results["val_loss"],
+    #         mode="lines+markers",
+    #         line=dict(color="rgba(19,24,156,1)"),
+    #         showlegend=True,
+    #         name="Validation",
+    #     )
+    # )
 
-    fig.update_layout(
-        xaxis=dict(title="Iteration", gridcolor="white"),
-        yaxis=dict(
-            title="Loss", gridcolor="white", zeroline=True, zerolinecolor="black"
-        ),
-        plot_bgcolor="rgba(0,0,0,0)",
-    )
-    plotly.io.write_html(fig, "./report_loss.html")
+    # fig.update_layout(
+    #     xaxis=dict(title="Iteration", gridcolor="white"),
+    #     yaxis=dict(
+    #         title="Loss", gridcolor="white", zeroline=True, zerolinecolor="black"
+    #     ),
+    #     plot_bgcolor="rgba(0,0,0,0)",
+    # )
+    # plotly.io.write_html(fig, "./report_loss.html")
 
     return fit_results
 
