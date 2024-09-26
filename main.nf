@@ -17,7 +17,7 @@ process TrainNeuralNetwork{
     script:
     """
     mkdir -p trained_model
-    python ${projectDir}/bin/analysis_neural_network.py -s ${params.start_index} -e ${params.end_index} -c ${params.chunk_size} -x ${params.max_seq_length} -r $reference_path -p ./pod5s -b $bam_path -m ./model -l $level_table_file 
+    python ${projectDir}/bin/train_neural_network.py -t ${train_path} -v ${valid_path} -m ./trained_model -c ${params.chunk_size} -b ${params.batch_size} -s ${params.single_data_size} -l ${params.max_seq_length} -k ${params.kmer_model} -y ${params.labels} -e ${params.epochs} -n ${params.model_name}  
     """
 }
 
@@ -25,5 +25,4 @@ workflow {
     //input_dirs = Channel.fromPath("${params.model_path}", type: 'dir')
     TrainNeuralNetwork(file("${params.train_path}"),file("${params.valid_path}"))
 }
-
 
