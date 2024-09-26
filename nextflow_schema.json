@@ -24,7 +24,7 @@
                 },
                 "valid_path": {
                     "type": "string",
-                    "format": "file-path",
+                    "format": "path",
                     "title": "Validation data folder",
                     "description": "Folder containing validation data for the model training",
                     "help_text": "Data can be generated using the XXX workflow (link)."
