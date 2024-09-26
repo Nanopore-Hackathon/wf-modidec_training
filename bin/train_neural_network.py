@@ -269,26 +269,76 @@ def train_nn(
         N_epoch=epochs,
         model_name=model_name,
     )
+
+    print("Plotting...")
+    # Plot accuracy
+    layout = go.Layout(height=800)
+    fig = go.Figure(layout=layout)
+
+    fig.add_trace(
+        go.Scatter(
+            y=fit_results["acc"],
+            mode="lines+markers",
+            line=dict(color="rgba(72,99,156,1)"),
+            showlegend=True,
+            name="Training",
+        )
+    )
+
+    fig.add_trace(
+        go.Scatter(
+            y=fit_results["val_acc"],
+            mode="lines+markers",
+            line=dict(color="rgba(19,24,156,1)"),
+            showlegend=True,
+            name="Validation",
+        )
+    )
+
+    fig.update_layout(
+        xaxis=dict(title="Iteration", gridcolor="white"),
+        yaxis=dict(
+            title="Accuracy", gridcolor="white", zeroline=True, zerolinecolor="black"
+        ),
+        plot_bgcolor="rgba(0,0,0,0)",
+    )
+    plotly.io.write_html(fig, "./report_accuracy.html")
+
+    # Plot loss
+    layout = go.Layout(height=800)
+    fig = go.Figure(layout=layout)
+
+    fig.add_trace(
+        go.Scatter(
+            y=fit_results["loss"],
+            mode="lines+markers",
+            line=dict(color="rgba(72,99,156,1)"),
+            showlegend=True,
+            name="Training",
+        )
+    )
+
+    fig.add_trace(
+        go.Scatter(
+            y=fit_results["val_loss"],
+            mode="lines+markers",
+            line=dict(color="rgba(19,24,156,1)"),
+            showlegend=True,
+            name="Validation",
+        )
+    )
+
+    fig.update_layout(
+        xaxis=dict(title="Iteration", gridcolor="white"),
+        yaxis=dict(
+            title="Loss", gridcolor="white", zeroline=True, zerolinecolor="black"
+        ),
+        plot_bgcolor="rgba(0,0,0,0)",
+    )
+    plotly.io.write_html(fig, "./report_loss.html")
+
     return fit_results
-    # in principle fit_results is a dict containing the following keys: 'loss', 'acc', 'val_loss', 'val_acc', 'lr'
 
-
-#     layout = go.Layout(height=800)
-#     fig = go.Figure(layout=layout)
-
-#     # Check if plot happens
-#     fig.add_trace(
-#         go.Scatter(
-#             x=range(0, fit_results["loss"]),
-#             y=fit_results["loss"],
-#             mode="lines+markers",
-#             line=dict(color="rgba(72,99,156,1)"),
-#             showlegend=True,
-#             name="Accuracy",
-#         )
-#     )
-
-#     pass
 
 # train_nn()
 train_nn(
