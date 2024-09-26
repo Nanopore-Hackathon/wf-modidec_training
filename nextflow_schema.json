@@ -38,6 +38,7 @@
             },
             "required": [
                 "train_path",
+                "valid_path",
                 "model_path"
             ]
         },
