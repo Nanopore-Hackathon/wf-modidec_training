@@ -344,19 +344,19 @@ def train_nn(
     plotly.io.write_html(fig, "./report_loss.html")
 
     #Plot ROC
-    from sklearn.metrics import roc_curve, auc, precision_recall_curve, average_precision_score
-    from sklearn.preprocessing import label_binarize
-    import plotly.express as px
+    # from sklearn.metrics import roc_curve, auc, precision_recall_curve, average_precision_score
+    # from sklearn.preprocessing import label_binarize
+    # import plotly.express as px
 
-    # # Get the true labels from the validation data generator
-    y_true_3d = validation_generator.labels 
-    n_classes = len(np.unique(y_true_3d))  # Number of classes in the multiclass problem
-    y_true = np.squeeze(y_true_3d)
+    # # # Get the true labels from the validation data generator
+    # y_true_3d = validation_generator.labels 
+    # n_classes = labels + 1 # Number of classes in the multiclass problem
+    # y_true = np.squeeze(y_true_3d)
 
-    print(y_true)
-    print(n_classes)
-    # Binarize the output labels for multiclass classification (One-vs-Rest)
-    y_true_bin = label_binarize(y_true, classes=np.arange(n_classes))
+    # print(y_true)
+    # print(n_classes)
+    # # Binarize the output labels for multiclass classification (One-vs-Rest)
+    # y_true_bin = label_binarize(y_true, classes=np.arange(n_classes))
 
     # # Predict the probabilities on the validation set using the trained model
     # y_pred_proba = model.predict(validation_generator)
