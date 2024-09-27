@@ -7,6 +7,7 @@ from remora import io, refine_signal_map
 import tensorflow as tf
 import plotly.graph_objects as go
 import plotly
+import json
 
 from keras.callbacks import LearningRateScheduler
 from Load_data_for_training_V2 import (
@@ -239,7 +240,7 @@ def NN_train(
     model.save(model_path + "/" + model_name)
 
     print("training complete")
-    return fit_results
+    return fit_results.history, validation_generator, model
 
 
 # Outer function
@@ -257,7 +258,7 @@ def train_nn(
     model_name: str,
 ):
     # Call training and then plot some other stuff
-    fit_results = NN_train(
+    fit_results,validation_generator, model = NN_train(
         train_path=train_path,
         valid_path=valid_path,
         model_path=model_path,
@@ -270,85 +271,92 @@ def train_nn(
         N_epoch=epochs,
         model_name=model_name,
     )
+    
+    print(fit_results)
+    # with open("fit_results.json", "w") as outfile: 
+    #     json.dump(fit_results, outfile)
 
     # print("Plotting...")
     # # Plot accuracy
-    # layout = go.Layout(height=800)
-    # fig = go.Figure(layout=layout)
+    layout = go.Layout(height=800)
+    fig = go.Figure(layout=layout)
 
-    # fig.add_trace(
-    #     go.Scatter(
-    #         y=fit_results["acc"],
-    #         mode="lines+markers",
-    #         line=dict(color="rgba(72,99,156,1)"),
-    #         showlegend=True,
-    #         name="Training",
-    #     )
-    # )
+    fig.add_trace(
+        go.Scatter(
+            y=fit_results["accuracy"],
+            mode="lines+markers",
+            line=dict(color="rgba(72,99,156,1)"),
+            showlegend=True,
+            name="Training",
+        )
+    )
 
-    # fig.add_trace(
-    #     go.Scatter(
-    #         y=fit_results["val_acc"],
-    #         mode="lines+markers",
-    #         line=dict(color="rgba(19,24,156,1)"),
-    #         showlegend=True,
-    #         name="Validation",
-    #     )
-    # )
+    fig.add_trace(
+        go.Scatter(
+            y=fit_results["val_accuracy"],
+            mode="lines+markers",
+            line=dict(color="rgba(19,24,156,1)"),
+            showlegend=True,
+            name="Validation",
+        )
+    )
 
-    # fig.update_layout(
-    #     xaxis=dict(title="Iteration", gridcolor="white"),
-    #     yaxis=dict(
-    #         title="Accuracy", gridcolor="white", zeroline=True, zerolinecolor="black"
-    #     ),
-    #     plot_bgcolor="rgba(0,0,0,0)",
-    # )
-    # plotly.io.write_html(fig, "./report_accuracy.html")
+    fig.update_layout(
+        xaxis=dict(title="Iteration", gridcolor="white"),
+        yaxis=dict(
+            title="Accuracy", gridcolor="white", zeroline=True, zerolinecolor="black"
+        ),
+        plot_bgcolor="rgba(0,0,0,0)",
+    )
+    plotly.io.write_html(fig, "./report_accuracy.html")
 
-    # # Plot loss
-    # layout = go.Layout(height=800)
-    # fig = go.Figure(layout=layout)
+    # Plot loss
+    layout = go.Layout(height=800)
+    fig = go.Figure(layout=layout)
 
-    # fig.add_trace(
-    #     go.Scatter(
-    #         y=fit_results["loss"],
-    #         mode="lines+markers",
-    #         line=dict(color="rgba(72,99,156,1)"),
-    #         showlegend=True,
-    #         name="Training",
-    #     )
-    # )
+    fig.add_trace(
+        go.Scatter(
+            y=fit_results["loss"],
+            mode="lines+markers",
+            line=dict(color="rgba(72,99,156,1)"),
+            showlegend=True,
+            name="Training",
+        )
+    )
 
-    # fig.add_trace(
-    #     go.Scatter(
-    #         y=fit_results["val_loss"],
-    #         mode="lines+markers",
-    #         line=dict(color="rgba(19,24,156,1)"),
-    #         showlegend=True,
-    #         name="Validation",
-    #     )
-    # )
+    fig.add_trace(
+        go.Scatter(
+            y=fit_results["val_loss"],
+            mode="lines+markers",
+            line=dict(color="rgba(19,24,156,1)"),
+            showlegend=True,
+            name="Validation",
+        )
+    )
 
-    # fig.update_layout(
-    #     xaxis=dict(title="Iteration", gridcolor="white"),
-    #     yaxis=dict(
-    #         title="Loss", gridcolor="white", zeroline=True, zerolinecolor="black"
-    #     ),
-    #     plot_bgcolor="rgba(0,0,0,0)",
-    # )
-    # plotly.io.write_html(fig, "./report_loss.html")
+    fig.update_layout(
+        xaxis=dict(title="Iteration", gridcolor="white"),
+        yaxis=dict(
+            title="Loss", gridcolor="white", zeroline=True, zerolinecolor="black"
+        ),
+        plot_bgcolor="rgba(0,0,0,0)",
+    )
+    plotly.io.write_html(fig, "./report_loss.html")
 
-    # Plot ROC
-    # from sklearn.metrics import roc_curve, auc, precision_recall_curve, average_precision_score
-    # from sklearn.preprocessing import label_binarize
-    # import plotly.express as px
+    #Plot ROC
+    from sklearn.metrics import roc_curve, auc, precision_recall_curve, average_precision_score
+    from sklearn.preprocessing import label_binarize
+    import plotly.express as px
 
     # # Get the true labels from the validation data generator
-    # y_true = validation_generator.labels  # Assuming this contains the true labels for validation set
-    # n_classes = len(np.unique(y_true))  # Number of classes in the multiclass problem
+    y_true_3d = validation_generator.labels 
+    n_classes = len(np.unique(y_true_3d))  # Number of classes in the multiclass problem
+    y_true = np.squeeze(y_true_3d)
 
-    # # Binarize the output labels for multiclass classification (One-vs-Rest)
-    # y_true_bin = label_binarize(y_true, classes=np.arange(n_classes))
+    print(y_true)
+    print(n_classes)
+    # Binarize the output labels for multiclass classification (One-vs-Rest)
+    y_true_bin = label_binarize(y_true, classes=np.arange(n_classes))
 
     # # Predict the probabilities on the validation set using the trained model
     # y_pred_proba = model.predict(validation_generator)
