@@ -227,6 +227,7 @@ def NN_train(
     # starts the model training
     fit_results = model.fit(
         training_generator,
+        validation_data=validation_generator,
         shuffle=True,
         epochs=N_epoch,
         workers=6,
@@ -235,7 +236,7 @@ def NN_train(
     )
 
     # saves the model
-    model.save(model_path + "/" + model_name)  # ?
+    model.save(model_path + "/" + model_name)
 
     print("training complete")
     return fit_results
