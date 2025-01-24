@@ -28,18 +28,11 @@
                     "title": "Validation data folder",
                     "description": "Folder containing validation data for the model training",
                     "help_text": "Data can be generated using the XXX workflow (link)."
-                },
-                "model_path": {
-                    "type": "string",
-                    "format": "path",
-                    "title": "Output folder",
-                    "description": "Folder path in which to save the model"
                 }
             },
             "required": [
                 "train_path",
-                "valid_path",
-                "model_path"
+                "valid_path"
             ]
         },
         "training_options": {
@@ -49,35 +42,15 @@
             "description": "Options for training the model.",
             "help_text": "Make sure that chunk size corresponds to what was used in the data curation step...",
             "properties": {
-                "chunk_size": {
-                    "type": "integer",
-                    "description": "Specify the chunk size that was used in data curation.",
-                    "default": 400
-                },
                 "batch_size": {
                     "type": "integer",
-                    "description": "Minibatch size for naural network training. Note: larger batch size will require more memory.",
-                    "default": 128
-                },
-                "single_data_size": {
-                    "type": "integer",
-                    "description": "Number of reads present in a single training file (as configured in the data curation workflow)",
+                    "description": "Minibatch size for neural network training. Note: larger batch size will require more memory.",
                     "default": 16
-                },
-                "max_seq_length": {
-                    "type": "integer",
-                    "description": "Maximum number of bases for the raw signal (usually `chunk_length` divided by 10 is a good starting point)",
-                    "default": 40
                 },
                 "kmer_model": {
                     "type": "integer",
                     "description": "Specify the kmer length to be used: either 5- (for 002 kit) or 9- mers (for 004 kit).",
                     "default": 9
-                },
-                "labels": {
-                    "type": "integer",
-                    "description": "Number of modifications included in the training data (e.g., if you have two types of modifications, then input 2)",
-                    "default": 1
                 },
                 "epochs": {
                     "type": "integer",

@@ -7,6 +7,7 @@ nextflow.enable.dsl = 2
 
 process TrainNeuralNetwork{
     label "modidec"
+    memory "64GB"
     publishDir (path: "${params.out_dir}", mode: "copy")
     stageInMode "symlink"
     input:

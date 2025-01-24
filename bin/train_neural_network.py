@@ -8,12 +8,11 @@ import tensorflow as tf
 import plotly.graph_objects as go
 import plotly
 import json
+import random
 
 from keras.callbacks import LearningRateScheduler
-from Load_data_for_training_V2 import (
-    Load_data_RNA,
-)  # Data loader for efficient memory handling
-from PseudoDeC_NN import PseudoDec_NN_Model  # Essential function to be imported
+from Load_data_for_training_V2 import Load_data_RNA # Data loader for efficient memory handling
+from ModiDec_NN import ModiDeC_model  # Essential function to be imported
 import os
 
 opt_parser = argparse.ArgumentParser()
@@ -108,6 +107,10 @@ opt_parser.add_argument(
     metavar="FILE",
 )
 
+random.seed(42)
+np.random.seed(42)
+tf.random.set_seed(42)
+
 # Parse args
 options = opt_parser.parse_args()
 
@@ -117,14 +120,23 @@ valid_path = str(options.valid_path)
 model_path = str(options.model_path)
 
 # Training options
-chunk_size = int(options.chunk_size)
-batch_size = int(options.batch_size)
-single_data_size = int(options.single_data_size)
-max_seq_length = int(options.max_seq_length)
-kmer_model = int(options.kmer_model)
-labels = int(options.labels)
+batch_size = int(options.batch_size) #Batch size is the number of reads that should be used for training in parallel
+kmer_model = int(options.kmer_model) #The k-mer size of the RNA kit
 epochs = int(options.epochs)
 model_name = str(options.model_name)
+
+
+data_list = os.listdir(train_path)
+probe_data = np.load(train_path + "/" + data_list[0])
+probe_x1_data = probe_data["train_input"]
+probe_y_data = probe_data["train_output"]
+
+##All these parameters become defined during data curation
+chunk_size = int(probe_x1_data.shape[1]) #Size of the receptive field of the network
+single_data_size = int(probe_x1_data.shape[0])  #Single data size is a measure of how many reads are stored in a single npz file.
+print("Singe data size: ",single_data_size)
+labels = int(probe_y_data.shape[2]) # Number of labels
+max_seq_length = int(probe_y_data.shape[1]) #Maximal length of sequences
 
 
 # Inner function
@@ -155,12 +167,16 @@ def NN_train(
         print("No GPU detected")
 
     data_list = os.listdir(train_path)  # List of train data
+    print(f"# Training files: {len(data_list)}")
     eval_list = os.listdir(valid_path)  # List of valid data
+    print(f"# Validation files: {len(eval_list)}")
+    #labels += 1
 
-    labels += 1
-
-    N_batches = int(len(data_list) / (batch_size / single_data_size))
+    N_batches = int(len(data_list) / (batch_size / single_data_size)) # The qoutient of batch_size/single_data_size defines how many files need to be read to collect enough reads to reach batch_size
     N_batches_2 = int(len(eval_list) / (batch_size / single_data_size))
+
+    
+    print(f"N Batches: {N_batches};N Batches 2: {N_batches_2}")
 
     # loads functions used for training
     # Data loading is performed by create a Load_data_RNA class. (Check file Load_data_for_training_V2.py)
@@ -174,7 +190,7 @@ def NN_train(
         seq_len=seq_len,
         labels=labels,
         batch_loading=single_data_size,
-        max_seq_len=max_seq_len,
+        max_seq_len=max_seq_len
     )
 
     # Test dataset
@@ -186,12 +202,12 @@ def NN_train(
         seq_len=seq_len,
         labels=labels,
         batch_loading=single_data_size,
-        max_seq_len=max_seq_len,
+        max_seq_len=max_seq_len
     )
 
     # define the model
     # Creates the model by calling () function. (Import the file Inception_resnet_2inp_V2.py)
-    model = PseudoDec_NN_Model(
+    model = ModiDeC_model(
         Inp_1=seq_len, Inp_2=max_seq_len, labels=labels, kmer_model=k_mer
     )
 
@@ -203,27 +219,22 @@ def NN_train(
         optimizer=opt_adam, loss=tf.losses.binary_crossentropy, metrics=["accuracy"]
     )
 
-    # Learning rate (lr) scheduler
-    # Varies learning rate after each epoch
-    def lr_schedule(epoch, optimizer):
+    # Define the learning rate schedule
+    def lr_schedule(epoch):
+        min_lr = 0.00005  # Minimum learning rate
+        initial_lr = 0.0001  # Example initial learning rate
 
-        min_lr = 0.0000125  # Set the minimum learning rate
-
-        # Update the learning rate if needed (similar to your original code)
         if epoch % 2 == 0 and epoch > 0:
-
-            new_lr = (
-                tf.keras.backend.get_value(model.optimizer.lr) * 0.5
-            )  # You can adjust the decay factor as needed
-            model.optimizer.lr.assign(new_lr)
-            return max(new_lr, min_lr)
-
+            new_lr = initial_lr * (0.5 ** (epoch // 2))  # Exponential decay every 2 epochs
         else:
-            return tf.keras.backend.get_value(model.optimizer.lr)
+            new_lr = initial_lr
 
-    lr_scheduler = LearningRateScheduler(
-        lambda epoch: lr_schedule(epoch, optimizer=opt_adam)
-    )
+        # Ensure the learning rate doesn't go below the minimum
+        return max(new_lr, min_lr)
+
+    # Set up the LearningRateScheduler callback
+    lr_scheduler = LearningRateScheduler(lr_schedule)    
+
 
     # starts the model training
     fit_results = model.fit(
@@ -236,9 +247,7 @@ def NN_train(
         callbacks=[lr_scheduler],
     )
 
-    # saves the model
-    model.save(model_path + "/" + model_name)
-
+    model.save(f"./{model_name}")
     print("training complete")
     return fit_results.history, validation_generator, model
 
@@ -258,7 +267,7 @@ def train_nn(
     model_name: str,
 ):
     # Call training and then plot some other stuff
-    fit_results,validation_generator, model = NN_train(
+    fit_results,validation_results, model = NN_train(
         train_path=train_path,
         valid_path=valid_path,
         model_path=model_path,
@@ -269,15 +278,12 @@ def train_nn(
         k_mer=kmer_model,
         labels=labels,
         N_epoch=epochs,
-        model_name=model_name,
+        model_name=model_name
     )
+    # saves the model
     
     print(fit_results)
-    # with open("fit_results.json", "w") as outfile: 
-    #     json.dump(fit_results, outfile)
 
-    # print("Plotting...")
-    # # Plot accuracy
     layout = go.Layout(height=800)
     fig = go.Figure(layout=layout)
 
@@ -337,7 +343,7 @@ def train_nn(
     fig.update_layout(
         xaxis=dict(title="Iteration", gridcolor="white"),
         yaxis=dict(
-            title="Loss", gridcolor="white", zeroline=True, zerolinecolor="black"
+            title="Loss", gridcolor="white", zeroline=True, zerolinecolor="black", range=[0,1]
         ),
         plot_bgcolor="rgba(0,0,0,0)",
     )

@@ -1,6 +1,13 @@
+
 from tensorflow import keras
 import numpy as np
 import os
+import random 
+import tensorflow as tf
+
+random.seed(42)
+np.random.seed(42)
+tf.random.set_seed(42)
 
 class Load_data_RNA(keras.utils.Sequence):
 
@@ -10,11 +17,10 @@ class Load_data_RNA(keras.utils.Sequence):
 
         self.batch_size = batch_size
         self.N_batches = N_batches
-        self.seq_len = seq_len
         self.batch_loading = batch_loading
 
-        self.X_train = np.zeros([self.batch_size,self.seq_len,1])
-        self.X_train2 = np.zeros([self.batch_size,max_seq_len,4])
+        self.X_train = np.zeros([self.batch_size,seq_len,1])
+        self.X_train2 = np.zeros([self.batch_size,max_seq_len,4,1])
         self.labels = np.zeros([self.batch_size,max_seq_len,labels])
 
         # The set of characters accepted in the transcription.
@@ -36,10 +42,10 @@ class Load_data_RNA(keras.utils.Sequence):
 
         const = self.batch_loading 
 
-        for i in range(int(self.batch_size/const)):
+        for i in range(int(self.batch_size/const)): #Determines how many files need to be load to fill the batches
 
             try:
-                with np.load(self.path + "/" + self.files_list[int(self.batch_size/const)*selected_ind + i]) as data:
+                with np.load(self.path + "/" + self.files_list[int(self.batch_size/const)*selected_ind + i]) as data: #Picks data from a randomized file list
                     
         
                     new_x_train = data["train_input"]
@@ -54,10 +60,13 @@ class Load_data_RNA(keras.utils.Sequence):
                     new_x_train2 = data["train_input2"]
                     y_train = data["train_output"]
 
-            self.X_train[i*const:(i+1)*const,:,0] = new_x_train
-            self.X_train2[i*const:(i+1)*const,:,:] = new_x_train2
+            self.X_train[i*const:(i+1)*const,:,0] = new_x_train 
+            #Overwrites the zero initialized arrays in the constructor at specific positions
+            self.X_train2[i*const:(i+1)*const,:,:,0] = new_x_train2 
+            #Overwrites the zero initialized arrays in the constructor at specific positions
 
             self.labels[i*const:(i+1)*const,:,:] = y_train 
+            #Overwrites the zero initialized arrays in the constructor at specific positions
 
         X_total = {
             "Input_1": self.X_train,
