@@ -4,11 +4,6 @@ import numpy as np
 import os
 import random 
 import tensorflow as tf
-
-random.seed(42)
-np.random.seed(42)
-tf.random.set_seed(42)
-
 class Load_data_RNA(keras.utils.Sequence):
 
     """generate data in sequence mode for training the neural network"""

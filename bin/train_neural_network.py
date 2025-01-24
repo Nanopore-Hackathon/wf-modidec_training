@@ -107,10 +107,6 @@ opt_parser.add_argument(
     metavar="FILE",
 )
 
-random.seed(42)
-np.random.seed(42)
-tf.random.set_seed(42)
-
 # Parse args
 options = opt_parser.parse_args()
 

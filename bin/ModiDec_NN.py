@@ -4,14 +4,6 @@ from keras.layers import Conv1D, MaxPooling1D , Add, Dropout , Dense , Conv2D
 from keras.layers import Input, Activation , Concatenate, LSTM ,  BatchNormalization, Reshape
 from keras.layers import Resizing , Masking, Multiply
 
-import random 
-import numpy as np
-
-random.seed(42)
-np.random.seed(42)
-tf.random.set_seed(42)
-
-
 
 
 def Conv1D_swish_bn(x, N_filters, kernel, strides):
