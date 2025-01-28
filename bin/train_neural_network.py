@@ -297,7 +297,7 @@ def train_nn(
         go.Scatter(
             y=fit_results["val_accuracy"],
             mode="lines+markers",
-            line=dict(color="rgba(214, 17, 55, 0.8)"),
+            line=dict(color="rgba(214,17,55,0.8)"),
             showlegend=True,
             name="Validation",
         )
@@ -330,7 +330,7 @@ def train_nn(
         go.Scatter(
             y=fit_results["val_loss"],
             mode="lines+markers",
-            line=dict(color="rgba(214, 17, 55, 1)"),
+            line=dict(color="rgba(214,17,55,1)"),
             showlegend=True,
             name="Validation",
         )
