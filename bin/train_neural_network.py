@@ -297,7 +297,7 @@ def train_nn(
         go.Scatter(
             y=fit_results["val_accuracy"],
             mode="lines+markers",
-            line=dict(color="rgba(19,24,156,1)"),
+            line=dict(color="rgba(214, 17, 55, 0.8)"),
             showlegend=True,
             name="Validation",
         )
@@ -330,7 +330,7 @@ def train_nn(
         go.Scatter(
             y=fit_results["val_loss"],
             mode="lines+markers",
-            line=dict(color="rgba(19,24,156,1)"),
+            line=dict(color="rgba(214, 17, 55, 1)"),
             showlegend=True,
             name="Validation",
         )
@@ -344,88 +344,6 @@ def train_nn(
         plot_bgcolor="rgba(0,0,0,0)",
     )
     plotly.io.write_html(fig, "./report_loss.html")
-
-    #Plot ROC
-    # from sklearn.metrics import roc_curve, auc, precision_recall_curve, average_precision_score
-    # from sklearn.preprocessing import label_binarize
-    # import plotly.express as px
-
-    # # # Get the true labels from the validation data generator
-    # y_true_3d = validation_generator.labels 
-    # n_classes = labels + 1 # Number of classes in the multiclass problem
-    # y_true = np.squeeze(y_true_3d)
-
-    # print(y_true)
-    # print(n_classes)
-    # # Binarize the output labels for multiclass classification (One-vs-Rest)
-    # y_true_bin = label_binarize(y_true, classes=np.arange(n_classes))
-
-    # # Predict the probabilities on the validation set using the trained model
-    # y_pred_proba = model.predict(validation_generator)
-
-    # # Initialize dictionaries to store ROC and PRC metrics for each class
-    # fpr = dict()
-    # tpr = dict()
-    # roc_auc = dict()
-    # precision = dict()
-    # recall = dict()
-    # prc_auc = dict()
-
-    # # Compute ROC and PRC curves for each class
-    # for i in range(n_classes):
-    #     fpr[i], tpr[i], _ = roc_curve(y_true_bin[:, i], y_pred_proba[:, i])
-    #     roc_auc[i] = auc(fpr[i], tpr[i])
-
-    #     precision[i], recall[i], _ = precision_recall_curve(y_true_bin[:, i], y_pred_proba[:, i])
-    #     prc_auc[i] = average_precision_score(y_true_bin[:, i], y_pred_proba[:, i])
-
-    # # Plot ROC curves for each class using Plotly
-    # layout = go.Layout(height=800)
-    # fig = go.Figure(layout=layout)
-    # roc_fig = go.Figure()
-    # # automatically define the colors base on how many labels is there
-    # colors = px.colors.qualitative.Plotly[:n_classes]
-    # for i, color in zip(range(n_classes), colors):
-    #     roc_fig.add_trace(go.Scatter(x=fpr[i], y=tpr[i], mode='lines',
-    #                                 name=f'ROC curve (Class {i}, AUC = {roc_auc[i]:.2f})',
-    #                                 line=dict(color=color)))
-
-    # # Add diagonal reference line for ROC
-    # roc_fig.add_trace(go.Scatter(x=[0, 1], y=[0, 1], mode='lines',
-    #                             line=dict(color='gray', dash='dash'), showlegend=False))
-
-    # # macro averaged AUC for ROC
-    # macro_roc_auc = auc(np.mean([fpr[i] for i in range(n_classes)], axis=0),
-    #                     np.mean([tpr[i] for i in range(n_classes)], axis=0))
-
-    # roc_fig.update_layout(
-    #     title=f"Macro-Averaged ROC AUC: {macro_roc_auc:.2f}",
-    #     xaxis_title="False Positive Rate",
-    #     yaxis_title="True Positive Rate",
-    #     xaxis=dict(showgrid=False),
-    #     yaxis=dict(showgrid=False)
-    # )
-
-    # # ROC plot html
-    # plotly.io.write_html(fig, "./report_ROC.html")
-
-    # # Step 6: Plot PRC curves for each class using Plotly
-    # prc_fig = go.Figure()
-    # for i, color in zip(range(n_classes), colors):
-    #     prc_fig.add_trace(go.Scatter(x=recall[i], y=precision[i], mode='lines',
-    #                                 line=dict(color=color)))
-
-    # macro_prc_auc = np.mean([prc_auc[i] for i in range(n_classes)])
-    # prc_fig.update_layout(
-    #     title=f"Macro-Averaged PRC AUC: {macro_prc_auc:.2f}",
-    #     xaxis_title="Recall",
-    #     yaxis_title="Precision",
-    #     xaxis=dict(showgrid=False),
-    #     yaxis=dict(showgrid=False)
-    # )
-
-    # # PRC plot html
-    # plotly.io.write_html(fig, "./report_PRC.html")
 
     return fit_results
 
