@@ -282,10 +282,12 @@ def train_nn(
 
     layout = go.Layout(height=800)
     fig = go.Figure(layout=layout)
+    x_axis = np.arange(1, len(fit_results["accuracy"]) + 1, 1)
 
     fig.add_trace(
         go.Scatter(
-            y=fit_results["accuracy"],
+            x = x_axis,
+            y= fit_results["accuracy"],
             mode="lines+markers",
             line=dict(color="rgba(72,99,156,1)"),
             showlegend=True,
@@ -295,6 +297,7 @@ def train_nn(
 
     fig.add_trace(
         go.Scatter(
+            x = x_axis,
             y=fit_results["val_accuracy"],
             mode="lines+markers",
             line=dict(color="rgba(214,17,55,0.8)"),
@@ -315,9 +318,11 @@ def train_nn(
     # Plot loss
     layout = go.Layout(height=800)
     fig = go.Figure(layout=layout)
+    x_axis = np.arange(1, len(fit_results["loss"]) + 1, 1)
 
     fig.add_trace(
         go.Scatter(
+            x = x_axis,
             y=fit_results["loss"],
             mode="lines+markers",
             line=dict(color="rgba(72,99,156,1)"),
@@ -328,6 +333,7 @@ def train_nn(
 
     fig.add_trace(
         go.Scatter(
+            x = x_axis,
             y=fit_results["val_loss"],
             mode="lines+markers",
             line=dict(color="rgba(214,17,55,1)"),
