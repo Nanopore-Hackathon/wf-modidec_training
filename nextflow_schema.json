@@ -64,33 +64,6 @@
                     "default": "modidec"
                 }
             }
-        },
-        "misc": {
-            "title": "Miscellaneous Options",
-            "type": "object",
-            "description": "Everything else.",
-            "default": "",
-            "properties": {
-                "disable_ping": {
-                    "type": "boolean",
-                    "default": false,
-                    "description": "Enable to prevent sending a workflow ping."
-                },
-                "help": {
-                    "type": "boolean",
-                    "description": "Display help text.",
-                    "fa_icon": "fas fa-question-circle",
-                    "default": false,
-                    "hidden": true
-                },
-                "version": {
-                    "type": "boolean",
-                    "description": "Display version and exit.",
-                    "fa_icon": "fas fa-question-circle",
-                    "default": false,
-                    "hidden": true
-                }
-            }
         }
     },
     "allOf": [
@@ -99,9 +72,6 @@
         },
         {
             "$ref": "#/definitions/training_options"
-        },
-        {
-            "$ref": "#/definitions/misc"
         }
     ],
     "properties": {
