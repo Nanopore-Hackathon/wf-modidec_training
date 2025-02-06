@@ -3,7 +3,7 @@ ModiDeC is a customizable neural network to identify RNA modifications from Oxfo
 
 ![Modidec schema](./figures/ModiDec_Epi2ME_schema.png)
 
-Here the model training part is implemented. Please visit [wf-modidec_data-curation](https://github.com/Nanopore-Hackathon/wf-modidec-data_curation) and [wf-modidec_analysis](https://github.com/Nanopore-Hackathon/wf-modidec_analysis) to complete the toolset. 
+Here the model training part is implemented. Please visit [wf-modidec_data-curation](https://github.com/Nanopore-Hackathon/wf-modidec_data-curation) and [wf-modidec_analysis](https://github.com/Nanopore-Hackathon/wf-modidec_analysis) to complete the toolset. 
 
 ## Requirements
 
