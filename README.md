@@ -23,3 +23,29 @@ Import the workflow in Epi2Me:
    -  Paste https://github.com/Nanopore-Hackathon/wf-modidec_training into the Edit line
    -  Click on Download
    -  The repository should now appear on the workflow list in Launch
+
+## Instructions for Network Training
+
+### Preparation
+Network training can be started with tensors in npz format obtained by the [wf-modidec_data-curation](https://github.com/Nanopore-Hackathon/wf-modidec-data_curation) workflow. Once data curation is performed the produced data should be split in a training and validation folder with distinct and therefore independent npz files. Independence of the training and validation datasets is important to prevent overfitting of the model. As a recommendation the training folder should contain ~80% of the data whereas the validation folder should contain ~20% of the data. Navigate to Launch on Epi2Me and click on the wf-modidec_data-curation workflow. Press Launch on the right side of the page and you will be linked to the menu. 
+
+### Input Options 
+1. Training Data Folder (Path to the folder containing training data as mentioned above)
+2. Validation Data Folder (Path to the folder containing training data as mentioned above)
+
+
+### Training Options
+
+1. Batch size (Define how many training instances should be used for training the network at once. Larger batch sizes require more memory (VRAM) of the GPU.)
+2. Kmer model (Which chemistry did you use ? RNA004 uses 9-mers -> 9 and RNA002 2-mers -> 2)
+3. Epochs (For how many iterations should the network be trained ? 1 Epoch corresponds to one iteration through all batches obtained form training dataset. For each iteration the training dataset will be shuffled to prevent overfitting. Several iterations are recommended. Out of experience ~4 Epochs often converge. It is also recommended to use a reasonable amount of training instances for a given motif. We recommend to use at least 30000 instances per training motif and modification pattern.)
+4. Model name (The name of the output model)
+
+### Training Output
+The output of the network training will be written to the output directory determined by Epi2ME. The path to the output directory can be found in the Logs section of the launched pipeline. (out_dir folder of Parameters listed there)
+The Reports section of the pipeline provides two result plots. The plot "report_accuracy" shows the training (blue) and validation (red) accuracy performance. "Report_loss" shows the training (blue) and validation (red) loss.
+
+
+![Modidec schema](./figures/example_accuracy_modidec_training.png)
+![Modidec schema](./figures/example_loss_modidec_training.png)
+
