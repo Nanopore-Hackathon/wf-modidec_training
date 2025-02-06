@@ -42,7 +42,7 @@ Network training can be started with tensors in npz format obtained by the [wf-m
 4. Model name (The name of the output model)
 
 ### Training Output
-The output of the network training will be written to the output directory determined by Epi2ME. The path to the output directory can be found in the Logs section of the launched pipeline. (out_dir folder of Parameters listed there)
+The output of the network training will be written to the output directory determined by Epi2ME. The path to the output directory can be found in the Logs section of the launched pipeline. (Parameters: out_dir folder)
 The Reports section of the pipeline provides two result plots. The plot "report_accuracy" shows the training (blue) and validation (red) accuracy performance. "Report_loss" shows the training (blue) and validation (red) loss.
 
 
