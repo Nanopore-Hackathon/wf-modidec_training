@@ -4,6 +4,7 @@ import numpy as np
 import os
 import random 
 import tensorflow as tf
+import math
 class Load_data_RNA(keras.utils.Sequence):
 
     """generate data in sequence mode for training the neural network"""
@@ -34,23 +35,17 @@ class Load_data_RNA(keras.utils.Sequence):
     def __getitem__(self, index):
  
         selected_ind = self.ind_rand[index]
-
         const = self.batch_loading 
 
-        for i in range(int(self.batch_size/const)): #Determines how many files need to be load to fill the batches
-
-            try:
-                with np.load(self.path + "/" + self.files_list[int(self.batch_size/const)*selected_ind + i]) as data: #Picks data from a randomized file list
-                    
-        
+        for i in range(math.ceil(self.batch_size/const)): #Determines how many files need to be load to fill the batches
+                #with np.load(self.path + "/" + self.files_list[int(self.batch_size/const)*selected_ind + i]) as data: #Picks data from a randomized file list
+            if (selected_ind + i) <= (len(self.files_list) - 1):
+                with np.load(self.path + "/" + self.files_list[selected_ind + i]) as data: #Picks data from a randomized file list    
                     new_x_train = data["train_input"]
                     new_x_train2 = data["train_input2"]
                     y_train = data["train_output"]
-
-            except:
-
-                with np.load(self.path + "/" + self.files_list[0]) as data:
-                            
+            else:
+                with np.load(self.path + "/" + self.files_list[np.random(0,self.N_batches)]) as data:
                     new_x_train = data["train_input"]
                     new_x_train2 = data["train_input2"]
                     y_train = data["train_output"]
@@ -59,7 +54,6 @@ class Load_data_RNA(keras.utils.Sequence):
             #Overwrites the zero initialized arrays in the constructor at specific positions
             self.X_train2[i*const:(i+1)*const,:,:,0] = new_x_train2 
             #Overwrites the zero initialized arrays in the constructor at specific positions
-
             self.labels[i*const:(i+1)*const,:,:] = y_train 
             #Overwrites the zero initialized arrays in the constructor at specific positions
 
@@ -67,5 +61,4 @@ class Load_data_RNA(keras.utils.Sequence):
             "Input_1": self.X_train,
             "Input_2": self.X_train2
             }
-            
         return X_total,  self.labels
