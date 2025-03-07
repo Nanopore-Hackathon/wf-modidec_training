@@ -217,7 +217,7 @@ def NN_train(
 
     # Define the learning rate schedule
     def lr_schedule(epoch):
-        min_lr = 0.0000125  # Minimum learning rate
+        min_lr = 0.00005  # Minimum learning rate
         initial_lr = 0.0001  # Example initial learning rate
 
         if epoch % 2 == 0 and epoch > 0:

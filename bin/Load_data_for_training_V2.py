@@ -37,14 +37,13 @@ class Load_data_RNA(keras.utils.Sequence):
         selected_ind = self.ind_rand[index]
         const = self.batch_loading 
 
-        for i in range(math.ceil(self.batch_size/const)): #Determines how many files need to be load to fill the batches
-                #with np.load(self.path + "/" + self.files_list[int(self.batch_size/const)*selected_ind + i]) as data: #Picks data from a randomized file list
-            if (selected_ind + i) <= (len(self.files_list) - 1):
-                with np.load(self.path + "/" + self.files_list[selected_ind + i]) as data: #Picks data from a randomized file list    
+        for i in range(int(self.batch_size/const)):
+            try:
+                with np.load(self.path + "/" + self.files_list[int(self.batch_size/const)*selected_ind + i]) as data:
                     new_x_train = data["train_input"]
                     new_x_train2 = data["train_input2"]
                     y_train = data["train_output"]
-            else:
+            except IndexError:
                 with np.load(self.path + "/" + self.files_list[np.random(0,self.N_batches)]) as data:
                     new_x_train = data["train_input"]
                     new_x_train2 = data["train_input2"]
