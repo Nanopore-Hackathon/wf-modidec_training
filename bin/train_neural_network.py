@@ -9,11 +9,15 @@ import plotly.graph_objects as go
 import plotly
 import json
 import random
+from tensorflow.keras import backend as K
+from tensorflow.keras.metrics import Precision, Recall
 
 from keras.callbacks import LearningRateScheduler
-from Load_data_for_training_V2 import Load_data_RNA # Data loader for efficient memory handling
+from Load_data_for_training_V2 import Load_data_RNA, Load_data_RNA_Validation # Data loader for efficient memory handling
 from ModiDec_NN import ModiDeC_model  # Essential function to be imported
 import os
+
+from sklearn.metrics import roc_curve, auc
 
 opt_parser = argparse.ArgumentParser()
 
@@ -42,15 +46,6 @@ opt_parser.add_argument(
     metavar="FILE",
 )
 
-# Training options
-opt_parser.add_argument(
-    "-c",
-    "--chunk_size",
-    dest="chunk_size",
-    help="TODO",
-    metavar="FILE",
-)
-
 opt_parser.add_argument(
     "-b",
     "--batch_size",
@@ -59,21 +54,6 @@ opt_parser.add_argument(
     metavar="FILE",
 )
 
-opt_parser.add_argument(
-    "-s",
-    "--single_data_size",
-    dest="single_data_size",
-    help="TODO",
-    metavar="FILE",
-)
-
-opt_parser.add_argument(
-    "-l",
-    "--max_seq_length",
-    dest="max_seq_length",
-    help="TODO",
-    metavar="FILE",
-)
 
 opt_parser.add_argument(
     "-k",
@@ -128,23 +108,15 @@ probe_x1_data = probe_data["train_input"]
 probe_y_data = probe_data["train_output"]
 
 ##All these parameters become defined during data curation
-chunk_size = int(probe_x1_data.shape[1]) #Size of the receptive field of the network
-single_data_size = int(probe_x1_data.shape[0])  #Single data size is a measure of how many reads are stored in a single npz file.
-print("Singe data size: ",single_data_size)
 labels = int(probe_y_data.shape[2]) # Number of labels
-max_seq_length = int(probe_y_data.shape[1]) #Maximal length of sequences
 
 
 # Inner function
-# note: seq_len is chunk_size,
 def NN_train(
     train_path: str,
     valid_path: str,
     model_path: str,
-    seq_len: int,
     batch_size: int,
-    single_data_size: int,
-    max_seq_len: int,
     k_mer: int,
     labels: int,
     N_epoch: int,
@@ -168,56 +140,48 @@ def NN_train(
     print(f"# Validation files: {len(eval_list)}")
     #labels += 1
 
-    N_batches = int(len(data_list) / (batch_size / single_data_size)) # The qoutient of batch_size/single_data_size defines how many files need to be read to collect enough reads to reach batch_size
-    N_batches_2 = int(len(eval_list) / (batch_size / single_data_size))
-
-    
-    print(f"N Batches: {N_batches};N Batches 2: {N_batches_2}")
-
     # loads functions used for training
     # Data loading is performed by create a Load_data_RNA class. (Check file Load_data_for_training_V2.py)
 
     # Training dataset
     training_generator = Load_data_RNA(
-        batch_size,
-        N_batches,
-        train_path,
-        data_list,
-        seq_len=seq_len,
-        labels=labels,
-        batch_loading=single_data_size,
-        max_seq_len=max_seq_len
+        batch_size = batch_size,
+        path = train_path,
+        files_list = data_list,
+        labels=labels
     )
 
     # Test dataset
-    validation_generator = Load_data_RNA(
-        batch_size,
-        N_batches_2,
-        valid_path,
-        eval_list,
-        seq_len=seq_len,
-        labels=labels,
-        batch_loading=single_data_size,
-        max_seq_len=max_seq_len
+    validation_generator = Load_data_RNA_Validation(
+        batch_size = batch_size,
+        path = valid_path,
+        files_list = eval_list,
+        labels = labels
     )
 
     # define the model
     # Creates the model by calling () function. (Import the file Inception_resnet_2inp_V2.py)
     model = ModiDeC_model(
-        Inp_1=seq_len, Inp_2=max_seq_len, labels=labels, kmer_model=k_mer
+        Inp_1=400, Inp_2=40, labels=labels, kmer_model=k_mer
     )
 
     # compile the model for the training
     # Optimizer of the neural network
     opt_adam = tf.keras.optimizers.Adam(learning_rate=0.0001)
+    
+
+    # def f1_score(y_true, y_pred):
+    #     precision = Precision()(y_true, y_pred)
+    #     recall = Recall()(y_true, y_pred)
+    #     return 2 * (precision * recall) / (precision + recall + K.epsilon())
 
     model.compile(
-        optimizer=opt_adam, loss=tf.losses.binary_crossentropy, metrics=["accuracy"]
+        optimizer=opt_adam, loss=tf.losses.binary_crossentropy, metrics=["accuracy",Precision(name="precision"),Recall(name="recall")]
     )
 
     # Define the learning rate schedule
-    def lr_schedule(epoch):
-        min_lr = 0.00005  # Minimum learning rate
+    def lr_scheduler(epoch):
+        min_lr = 0.0000125  # Minimum learning rate
         initial_lr = 0.0001  # Example initial learning rate
 
         if epoch % 2 == 0 and epoch > 0:
@@ -229,7 +193,7 @@ def NN_train(
         return max(new_lr, min_lr)
 
     # Set up the LearningRateScheduler callback
-    lr_scheduler = LearningRateScheduler(lr_schedule)    
+    lr_scheduler = LearningRateScheduler(lr_scheduler)    
 
 
     # starts the model training
@@ -244,6 +208,9 @@ def NN_train(
     )
 
     model.save(f"./{model_name}")
+    
+    # Get the true labels and predictions from validation generator
+    
     print("training complete")
     return fit_results.history, validation_generator, model
 
@@ -253,10 +220,7 @@ def train_nn(
     train_path: str,
     valid_path: str,
     model_path: str,
-    chunk_size: int,
     batch_size: int,
-    single_data_size: int,
-    max_seq_length: int,
     kmer_model: str,
     labels: int,
     epochs: int,
@@ -267,10 +231,7 @@ def train_nn(
         train_path=train_path,
         valid_path=valid_path,
         model_path=model_path,
-        seq_len=chunk_size,
         batch_size=batch_size,
-        single_data_size=single_data_size,
-        max_seq_len=max_seq_length,
         k_mer=kmer_model,
         labels=labels,
         N_epoch=epochs,
@@ -279,90 +240,123 @@ def train_nn(
     # saves the model
     
     print(fit_results)
+    def create_lineplot(fit_results,metric:str):
+        layout = go.Layout(height=800)
+        fig = go.Figure(layout=layout)
+        x_axis = np.arange(1, len(fit_results["accuracy"]) + 1, 1)
 
-    layout = go.Layout(height=800)
-    fig = go.Figure(layout=layout)
-    x_axis = np.arange(1, len(fit_results["accuracy"]) + 1, 1)
-
-    fig.add_trace(
-        go.Scatter(
-            x = x_axis,
-            y= fit_results["accuracy"],
-            mode="lines+markers",
-            line=dict(color="rgba(72,99,156,1)"),
-            showlegend=True,
-            name="Training",
+        fig.add_trace(
+            go.Scatter(
+                x = x_axis,
+                y= fit_results[f"{metric}"],
+                mode="lines+markers",
+                line=dict(color="rgba(72,99,156,1)"),
+                showlegend=True,
+                name="Training",
+            )
         )
-    )
 
-    fig.add_trace(
-        go.Scatter(
-            x = x_axis,
-            y=fit_results["val_accuracy"],
-            mode="lines+markers",
-            line=dict(color="rgba(214,17,55,0.8)"),
-            showlegend=True,
-            name="Validation",
+        fig.add_trace(
+            go.Scatter(
+                x = x_axis,
+                y=fit_results[f"val_{metric}"],
+                mode="lines+markers",
+                line=dict(color="rgba(214,17,55,0.8)"),
+                showlegend=True,
+                name="Validation",
+            )
         )
-    )
 
-    fig.update_layout(
-        xaxis=dict(title="Iteration", gridcolor="white"),
+        fig.update_layout(
+            xaxis=dict(title="Iteration", gridcolor="white"),
+            yaxis=dict(
+                title=f"{metric.capitalize()}", gridcolor="white", zeroline=True, zerolinecolor="black"
+            ),
+            plot_bgcolor="rgba(0,0,0,0)",
+        )
+        plotly.io.write_html(fig, f"./report_{metric}.html")
+
+    create_lineplot(fit_results, "accuracy")
+    create_lineplot(fit_results,"precision")
+    create_lineplot(fit_results,"recall")
+    create_lineplot(fit_results,"loss")
+    
+    def create_roc_curve(validation_results, model):
+        colors = [
+        "rgba(255, 179, 186, 1)", "rgba(255, 223, 186, 1)", "rgba(255, 255, 186, 1)", "rgba(186, 255, 201, 1)",
+        "rgba(186, 225, 255, 1)", "rgba(255, 186, 239, 1)", "rgba(217, 217, 217, 1)", "rgba(219, 112, 147, 1)",
+        "rgba(218, 165, 32, 1)", "rgba(144, 238, 144, 1)", "rgba(173, 216, 230, 1)", "rgba(216, 191, 216, 1)",
+        "rgba(255, 182, 193, 1)", "rgba(255, 218, 185, 1)", "rgba(175, 238, 238, 1)", "rgba(250, 250, 210, 1)",
+        "rgba(245, 245, 220, 1)", "rgba(255, 228, 196, 1)", "rgba(230, 230, 250, 1)", "rgba(240, 255, 255, 1)",
+        "rgba(240, 255, 240, 1)", "rgba(255, 250, 250, 1)", "rgba(255, 245, 238, 1)", "rgba(255, 239, 213, 1)",
+        "rgba(255, 228, 225, 1)", "rgba(240, 248, 255, 1)", "rgba(224, 255, 255, 1)", "rgba(240, 230, 140, 1)",
+        "rgba(245, 222, 179, 1)", "rgba(176, 224, 230, 1)", "rgba(255, 192, 203, 1)", "rgba(152, 251, 152, 1)",
+        "rgba(221, 160, 221, 1)", "rgba(255, 160, 122, 1)", "rgba(135, 206, 250, 1)", "rgba(100, 149, 237, 1)",
+        "rgba(102, 205, 170, 1)", "rgba(123, 104, 238, 1)", "rgba(147, 112, 219, 1)", "rgba(186, 85, 211, 1)",
+        "rgba(199, 21, 133, 1)", "rgba(139, 0, 139, 1)", "rgba(0, 255, 127, 1)", "rgba(127, 255, 212, 1)",
+        "rgba(255, 105, 180, 1)", "rgba(255, 20, 147, 1)", "rgba(219, 112, 147, 1)", "rgba(255, 228, 181, 1)",
+        "rgba(210, 180, 140, 1)", "rgba(255, 239, 0, 1)", "rgba(255, 182, 193, 1)", "rgba(221, 160, 221, 1)",
+        "rgba(176, 224, 230, 1)", "rgba(144, 238, 144, 1)", "rgba(255, 160, 122, 1)", "rgba(240, 128, 128, 1)",
+        "rgba(255, 127, 80, 1)", "rgba(250, 128, 114, 1)", "rgba(233, 150, 122, 1)", "rgba(216, 112, 147, 1)",
+        "rgba(255, 69, 0, 1)", "rgba(255, 140, 0, 1)", "rgba(255, 215, 0, 1)", "rgba(173, 255, 47, 1)",
+        "rgba(124, 252, 0, 1)", "rgba(127, 255, 0, 1)", "rgba(0, 250, 154, 1)", "rgba(32, 178, 170, 1)",
+        "rgba(72, 209, 204, 1)", "rgba(0, 206, 209, 1)", "rgba(95, 158, 160, 1)", "rgba(70, 130, 180, 1)",
+        "rgba(30, 144, 255, 1)", "rgba(0, 191, 255, 1)", "rgba(65, 105, 225, 1)", "rgba(138, 43, 226, 1)",
+        "rgba(139, 69, 19, 1)", "rgba(160, 82, 45, 1)", "rgba(210, 105, 30, 1)", "rgba(205, 133, 63, 1)",
+        "rgba(244, 164, 96, 1)", "rgba(255, 228, 181, 1)", "rgba(255, 222, 173, 1)", "rgba(255, 218, 185, 1)",
+        "rgba(255, 250, 205, 1)", "rgba(240, 230, 140, 1)", "rgba(255, 239, 213, 1)", "rgba(245, 245, 220, 1)"
+        ]
+        y_true = []
+        y_scores = []
+        for batch, labels in validation_results:
+            y_true.extend(labels)  # Store true labels
+            y_scores.extend(model.predict(batch))  # Store predicted probabilities
+        
+        layout = go.Layout(height=800)
+        fig = go.Figure(layout=layout)
+        
+        for mod_index in range(y_scores[0].shape[1]):
+            print(mod_index)
+            temp_y_true = np.zeros(40*len(y_true))
+            temp_y_scores = np.zeros(40*len(y_scores))
+            for output_index, (y_scores_i,y_true_i) in enumerate(zip(y_scores,y_true)): 
+                temp_y_true[output_index*40:(output_index + 1)*40] = y_true_i[:,mod_index]
+                temp_y_scores[output_index*40:(output_index + 1)*40] = y_scores_i[:,mod_index]
+            temp_y_scores = np.array(temp_y_scores > 0.5,dtype="int")
+            print(temp_y_true)
+            print(temp_y_scores)
+            temp_fpr, temp_tpr, _ = roc_curve(temp_y_true,temp_y_scores)
+            temp_roc_auc = auc(temp_fpr,temp_tpr)
+            mod_type = str(mod_index)
+            if mod_index == 0:
+                mod_type = "Unmodified"
+            fig.add_trace(
+            go.Scatter(
+                x = temp_fpr,
+                y= temp_tpr,
+                mode="lines",
+                line=dict(color=colors[mod_index]),
+                showlegend=True,
+                name=f"Mod type: {mod_type}, AUC: {temp_roc_auc}",
+                )
+            )
+        fig.update_layout(
+        xaxis=dict(title="FPR", gridcolor="white"),
         yaxis=dict(
-            title="Accuracy", gridcolor="white", zeroline=True, zerolinecolor="black"
+            title="TPR", gridcolor="white", zeroline=True, zerolinecolor="black"
         ),
         plot_bgcolor="rgba(0,0,0,0)",
-    )
-    plotly.io.write_html(fig, "./report_accuracy.html")
-
-    # Plot loss
-    layout = go.Layout(height=800)
-    fig = go.Figure(layout=layout)
-    x_axis = np.arange(1, len(fit_results["loss"]) + 1, 1)
-
-    fig.add_trace(
-        go.Scatter(
-            x = x_axis,
-            y=fit_results["loss"],
-            mode="lines+markers",
-            line=dict(color="rgba(72,99,156,1)"),
-            showlegend=True,
-            name="Training",
         )
-    )
-
-    fig.add_trace(
-        go.Scatter(
-            x = x_axis,
-            y=fit_results["val_loss"],
-            mode="lines+markers",
-            line=dict(color="rgba(214,17,55,1)"),
-            showlegend=True,
-            name="Validation",
-        )
-    )
-
-    fig.update_layout(
-        xaxis=dict(title="Iteration", gridcolor="white"),
-        yaxis=dict(
-            title="Loss", gridcolor="white", zeroline=True, zerolinecolor="black", range=[0,1]
-        ),
-        plot_bgcolor="rgba(0,0,0,0)",
-    )
-    plotly.io.write_html(fig, "./report_loss.html")
-
+        plotly.io.write_html(fig, "./report_roc.html")    
+    create_roc_curve(validation_results, model)
     return fit_results
 
 
-# train_nn()
 train_nn(
     train_path=train_path,
     valid_path=valid_path,
     model_path=model_path,
-    chunk_size=chunk_size,
     batch_size=batch_size,
-    single_data_size=single_data_size,
-    max_seq_length=max_seq_length,
     kmer_model=kmer_model,
     labels=labels,
     epochs=epochs,
