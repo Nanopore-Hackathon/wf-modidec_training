@@ -26,7 +26,6 @@ class Load_data_RNA(keras.utils.Sequence):
             data = np.load(self.path + "/" + self.files_list[batch_index])
             filesize = data["train_input"].shape[0]
             self.instances += filesize
-        self.used_combinations = {}
 
     def __len__(self):
         '''
@@ -35,24 +34,16 @@ class Load_data_RNA(keras.utils.Sequence):
         return math.floor(self.instances / self.batch_size)
     
     def __getitem__(self, index):
+        iterator = 0
         for batch_index in range(self.batch_size):
-            random_file_index = np.random.randint(0,len(self.files_list))
-            filename = self.path + "/" + self.files_list[random_file_index]
-            try:
-                already_taken_indices = self.used_combinations[filename]
-            except KeyError:
-                self.used_combinations[filename] = []
-                already_taken_indices = []            
-            data = np.load(filename)
-            filesize = data["train_input"].shape[0]
+            if iterator % math.ceil(self.batch_size * 0.2) == 0:
+                random_file_index = np.random.randint(0,len(self.files_list))
+                filename = self.path + "/" + self.files_list[random_file_index]       
+                data = np.load(filename)
+                filesize = data["train_input"].shape[0]
+            iterator += 1
             #Select possible indices
             random_chunk_index = np.random.randint(0,filesize)
-            #Register drawn index
-            iterator=0
-            while (random_chunk_index in already_taken_indices and iterator <= 10):
-                random_chunk_index = np.random.randint(0,filesize)
-                iterator += 1
-            self.used_combinations[filename].append(random_chunk_index)
             new_x_train = data["train_input"][random_chunk_index]
             new_x_train2 = data["train_input2"][random_chunk_index]
             y_train = data["train_output"][random_chunk_index]
