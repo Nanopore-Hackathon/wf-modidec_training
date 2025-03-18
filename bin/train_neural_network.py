@@ -152,7 +152,7 @@ def NN_train(
     )
 
     # Test dataset
-    validation_generator = Load_data_RNA_Validation(
+    validation_generator = Load_data_RNA(
         batch_size = batch_size,
         path = valid_path,
         files_list = eval_list,
