@@ -316,15 +316,12 @@ def train_nn(
         fig = go.Figure(layout=layout)
         
         for mod_index in range(y_scores[0].shape[1]):
-            print(mod_index)
             temp_y_true = np.zeros(40*len(y_true))
             temp_y_scores = np.zeros(40*len(y_scores))
             for output_index, (y_scores_i,y_true_i) in enumerate(zip(y_scores,y_true)): 
                 temp_y_true[output_index*40:(output_index + 1)*40] = y_true_i[:,mod_index]
                 temp_y_scores[output_index*40:(output_index + 1)*40] = y_scores_i[:,mod_index]
             temp_y_scores = np.array(temp_y_scores > 0.5,dtype="int")
-            print(temp_y_true)
-            print(temp_y_scores)
             temp_fpr, temp_tpr, _ = roc_curve(temp_y_true,temp_y_scores)
             temp_roc_auc = auc(temp_fpr,temp_tpr)
             mod_type = str(mod_index)
