@@ -13,7 +13,7 @@ from tensorflow.keras import backend as K
 from tensorflow.keras.metrics import Precision, Recall
 
 from keras.callbacks import LearningRateScheduler
-from Load_data_for_training_V2 import Load_data_RNA, Load_data_RNA_Validation # Data loader for efficient memory handling
+from Load_data_for_training_V2 import Load_data_RNA,Load_data_RNA_Validation # Data loader for efficient memory handling
 from ModiDec_NN import ModiDeC_model  # Essential function to be imported
 import os
 
@@ -152,7 +152,7 @@ def NN_train(
     )
 
     # Test dataset
-    validation_generator = Load_data_RNA(
+    validation_generator = Load_data_RNA_Validation(
         batch_size = batch_size,
         path = valid_path,
         files_list = eval_list,
@@ -321,7 +321,6 @@ def train_nn(
             for output_index, (y_scores_i,y_true_i) in enumerate(zip(y_scores,y_true)): 
                 temp_y_true[output_index*40:(output_index + 1)*40] = y_true_i[:,mod_index]
                 temp_y_scores[output_index*40:(output_index + 1)*40] = y_scores_i[:,mod_index]
-            temp_y_scores = np.array(temp_y_scores > 0.5,dtype="int")
             temp_fpr, temp_tpr, _ = roc_curve(temp_y_true,temp_y_scores)
             temp_roc_auc = auc(temp_fpr,temp_tpr)
             mod_type = str(mod_index)
