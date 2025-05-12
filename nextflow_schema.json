@@ -45,7 +45,15 @@
                 "batch_size": {
                     "type": "integer",
                     "description": "Minibatch size for neural network training. Note: larger batch size will require more memory.",
-                    "default": 16
+                    "default": 128,
+                    "enum": [
+                        16,
+                        32,
+                        64,
+                        128,
+                        256,
+                        512
+                    ]
                 },
                 "kmer_model": {
                     "type": "integer",
