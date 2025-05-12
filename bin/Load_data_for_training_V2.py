@@ -41,7 +41,7 @@ class Load_data_RNA(keras.utils.Sequence):
                 filename = self.path + "/" + self.files_list[random_file_index]       
                 data = np.load(filename)
                 filesize = data["train_input"].shape[0]
-                random_chunk_index = np.random.randint(0,filesize - 16)
+                random_chunk_index = np.random.randint(0,filesize - 15)
                 random_chunk_index = random_chunk_index - (random_chunk_index % 16)
             #Select possible indices
             modulo_index = iterator % 16
@@ -99,7 +99,7 @@ class Load_data_RNA_Validation(keras.utils.Sequence):
                 filename = self.path + "/" + self.files_list[random_file_index]       
                 data = np.load(filename)
                 filesize = data["train_input"].shape[0]
-                random_chunk_index = np.random.randint(0,filesize - 16)
+                random_chunk_index = np.random.randint(0,filesize - 15)
                 random_chunk_index = random_chunk_index - (random_chunk_index % 16)
             #Select possible indices
             modulo_index = iterator % 16
