@@ -175,33 +175,10 @@ def NN_train(
     #     recall = Recall()(y_true, y_pred)
     #     return 2 * (precision * recall) / (precision + recall + K.epsilon())
 
-    # model.compile(
-    #     optimizer=opt_adam, loss=tf.losses.binary_crossentropy, metrics=["accuracy",Precision(name="precision"),Recall(name="recall")]
-    # )
-    
-    
-    class_weights = tf.constant([0.6 if index_mod == 0 else 1.0 for index_mod in range(probe_data["train_output"].shape[2])])  # Replace with computed weights
-
-    # def weighted_categorical_crossentropy(y_true, y_pred):
-    #     ce = tf.keras.losses.categorical_crossentropy(y_true, y_pred)
-    #     weights = tf.reduce_sum(class_weights * y_true, axis=-1)
-    #     return ce * weights  # Apply weight per sample
-    
-    # model.compile(
-    #     optimizer=opt_adam, loss=weighted_categorical_crossentropy, metrics=["accuracy",Precision(name="precision"),Recall(name="recall")]
-    # )
-    
-    
-    def weighted_binary_crossentropy(y_true, y_pred):
-        bce = tf.keras.losses.binary_crossentropy(y_true, y_pred)
-        # Multiply loss by feature-wise weights
-        weighted_bce = bce * tf.reshape(class_weights, (probe_data["train_output"].shape[2], probe_data["train_output"].shape[1]))
-        return weighted_bce  # Keeps shape consistent
-    
     model.compile(
-        optimizer=opt_adam, loss=weighted_binary_crossentropy, metrics=["accuracy",Precision(name="precision"),Recall(name="recall")]
+        optimizer=opt_adam, loss=tf.losses.binary_crossentropy, metrics=["accuracy",Precision(name="precision"),Recall(name="recall")]
     )
-
+    
     
     # Define the learning rate schedule
     def lr_scheduler(epoch):
@@ -225,7 +202,7 @@ def NN_train(
         training_generator,
         validation_data=validation_generator,
         shuffle=True,
-        epochs=N_epoch,
+        epochs=N_epoch, 
         workers=6,
         max_queue_size=256,
         callbacks=[lr_scheduler],
@@ -262,8 +239,6 @@ def train_nn(
         model_name=model_name
     )
     # saves the model
-    
-    print(fit_results)
     def create_lineplot(fit_results,metric:str):
         layout = go.Layout(height=800)
         fig = go.Figure(layout=layout)
