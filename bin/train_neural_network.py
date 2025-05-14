@@ -175,16 +175,40 @@ def NN_train(
     #     recall = Recall()(y_true, y_pred)
     #     return 2 * (precision * recall) / (precision + recall + K.epsilon())
 
+    # model.compile(
+    #     optimizer=opt_adam, loss=tf.losses.binary_crossentropy, metrics=["accuracy",Precision(name="precision"),Recall(name="recall")]
+    # )
+    
+    
+    class_weights = tf.constant([0.6 if index_mod == 0 else 1.0 for index_mod in range(probe_data["train_output"].shape[2])])  # Replace with computed weights
+
+    # def weighted_categorical_crossentropy(y_true, y_pred):
+    #     ce = tf.keras.losses.categorical_crossentropy(y_true, y_pred)
+    #     weights = tf.reduce_sum(class_weights * y_true, axis=-1)
+    #     return ce * weights  # Apply weight per sample
+    
+    # model.compile(
+    #     optimizer=opt_adam, loss=weighted_categorical_crossentropy, metrics=["accuracy",Precision(name="precision"),Recall(name="recall")]
+    # )
+    
+    
+    def weighted_binary_crossentropy(y_true, y_pred):
+        bce = tf.keras.losses.binary_crossentropy(y_true, y_pred)
+        # Multiply loss by feature-wise weights
+        weighted_bce = bce * tf.reshape(class_weights, (probe_data["train_output"].shape[2], probe_data["train_output"].shape[1]))
+        return weighted_bce  # Keeps shape consistent
+    
     model.compile(
-        optimizer=opt_adam, loss=tf.losses.binary_crossentropy, metrics=["accuracy",Precision(name="precision"),Recall(name="recall")]
+        optimizer=opt_adam, loss=weighted_binary_crossentropy, metrics=["accuracy",Precision(name="precision"),Recall(name="recall")]
     )
 
+    
     # Define the learning rate schedule
     def lr_scheduler(epoch):
         min_lr = 0.0000125  # Minimum learning rate
         initial_lr = 0.0001  # Example initial learning rate
 
-        if epoch % 2 == 0 and epoch > 0:
+        if (epoch + 1) % 2 == 0 and epoch > 0:
             new_lr = initial_lr * (0.5 ** (epoch // 2))  # Exponential decay every 2 epochs
         else:
             new_lr = initial_lr
